@@ -5,13 +5,15 @@
 #![doc(html_root_url = "https://docs.rs/foreign-types-shared/0.3")]
 
 use core::cell::UnsafeCell;
-use core::marker::PhantomData;
+use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 
 /// An opaque type used to define `ForeignTypeRef` types.
 ///
 /// A type implementing `ForeignTypeRef` should simply be a newtype wrapper around this type.
-pub struct Opaque(PhantomData<UnsafeCell<*mut ()>>);
+// Marked as `!Send`, `!Sync`, `!UnwindSafe`, `!RefUnwindSafe`, `!Unpin` and as mutable behind shared references.
+// TODO: Replace this with `extern type` to also mark it as `!Sized`.
+pub struct Opaque(UnsafeCell<PhantomData<(*mut UnsafeCell<()>, PhantomPinned)>>);
 
 /// A type implemented by wrappers over foreign types.
 ///
